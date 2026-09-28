@@ -30,6 +30,7 @@ export const meta = {
   emoji: '🦊',
 };
 
+
 export default function CameraScreen() {
   // Camera helpers: permission, a ref to the camera, and front/back switching.
   const { permission, requestPermission, cameraRef, facing, toggleFacing } = useCameraSetup();
@@ -59,6 +60,8 @@ export default function CameraScreen() {
     setIsCameraReady(false); // the camera starts again, so wait for it
   }
 
+
+
   // ─────────────────────────────────────────────────────────────
   // SCREEN 1: we have a photo → show it
   // ─────────────────────────────────────────────────────────────
@@ -67,8 +70,11 @@ export default function CameraScreen() {
       <View style={styles.container}>
         <Image source={{ uri: photoUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
 
-        {/* 🎨 YOUR PHOTO OVERLAY GOES HERE – anything rendered here appears on top of the photo
-            (frames, stickers, date stamps...). Use position: 'absolute' to place things. */}
+        <Image
+          source={tilfældigtBillede()}
+          style={styles.sticker}
+          resizeMode="contain"
+        />
 
         <View style={styles.bottomBar}>
           <Pressable style={styles.textButton} onPress={retake}>
@@ -126,6 +132,21 @@ export default function CameraScreen() {
     </PermissionGate>
   );
 }
+const billeder = [ 
+  require('./img/best_move-removebg-preview.png'), 
+  require('./img/Brilliant_move-removebg-preview.png'), 
+  require('./img/good_move-removebg-preview.png'), 
+  require('./img/chess-blunder-removebg-preview.png'), 
+  require('./img/mistake-removebg-preview.png'), 
+  require('./img/miss-removebg-preview.png'),
+  require('./img/great_move-removebg-preview.png')
+] 
+  
+  export function tilfældigtBillede() { 
+    const nummer = Math.floor(Math.random() * billeder.length) 
+    return billeder[nummer] 
+  }
+
 
 // All the styles for this screen. Change colors and sizes freely!
 const styles = StyleSheet.create({

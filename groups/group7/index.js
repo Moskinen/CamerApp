@@ -23,11 +23,14 @@ import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 import { PermissionGate, pickFromGallery, useCameraSetup } from '../../components/shared';
+import { FlatList } from 'react-native';
+import { Modal } from 'react-native';
+
 
 // ✏️ Change this to rename your screen and pick your emoji on the home screen.
 export const meta = {
-  title: 'Group 7',
-  emoji: '🐙',
+  title: 'monkeyBoys',
+  emoji: '🦍',
 };
 
 export default function CameraScreen() {
@@ -40,17 +43,31 @@ export default function CameraScreen() {
   // The camera needs a moment to start. We can't take a photo before it's ready.
   const [isCameraReady, setIsCameraReady] = useState(false);
 
+  const [toggleUgly, setToggleUgly] = useState(true)
+  const [toggleGallery, setToggleGallery] = useState(false)
+  const monkeys = [
+    require('./monke.jpeg'),
+    require('./monke2.jpeg'),
+    require('./monke3.jpeg'),
+  ];
+  const [monkey, setMonkey] = useState(randomMonkey())
+
+  function randomMonkey() {
+    return monkeys[Math.floor(Math.random() * monkeys.length)];
+  }
+
   // Take a photo and remember where it was saved.
   async function takePhoto() {
     if (!cameraRef.current || !isCameraReady) return;
     const photo = await cameraRef.current.takePictureAsync({ quality: 0.5 });
-    setPhotoUri(photo.uri);
+    setPhotoUri(Image.resolveAssetSource(monkey).uri);
   }
 
   // No camera (e.g. simulator)? Pick a photo from the gallery instead.
   async function pickPhoto() {
-    const uri = await pickFromGallery();
-    if (uri) setPhotoUri(uri);
+    // const uri = await pickFromGallery();
+    // if (uri) setPhotoUri(uri);
+    setToggleGallery(true)
   }
 
   // Go back to the camera.
@@ -58,6 +75,7 @@ export default function CameraScreen() {
     setPhotoUri(null);
     setIsCameraReady(false); // the camera starts again, so wait for it
   }
+
 
   // ─────────────────────────────────────────────────────────────
   // SCREEN 1: we have a photo → show it
@@ -82,27 +100,70 @@ export default function CameraScreen() {
   // ─────────────────────────────────────────────────────────────
   // SCREEN 2: no photo yet → show the live camera
   // ─────────────────────────────────────────────────────────────
+
+
   return (
     <PermissionGate permission={permission} requestPermission={requestPermission}>
       <View style={styles.container}>
         {/* The live camera. Don't put children inside CameraView –
             put overlays next to it (below), they're drawn on top. */}
-        <CameraView
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          facing={facing}
-          onCameraReady={() => setIsCameraReady(true)}
-        />
+        {toggleUgly ?
+          <CameraView
+            ref={cameraRef}
+            style={StyleSheet.absoluteFill}
+            facing={facing}
+            onCameraReady={() => setIsCameraReady(true)}
+          />
+          :
+          <Image
+            source={monkey}
+            style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
+            resizeMode="cover"
+
+          />
+        }
 
         {/* 🎨 YOUR OVERLAY GOES HERE – anything rendered here appears on top of the camera */}
 
         {/* Switch between front and back camera (top right). */}
-        <Pressable style={styles.flipButton} onPress={toggleFacing}>
+        <Pressable style={styles.flipButton}
+          onPress={() => {
+            setToggleUgly(ugly => !ugly);
+            setIsCameraReady(false);
+            setMonkey(randomMonkey());
+          }}
+        >
           <Text style={styles.iconLabel}>🔄</Text>
         </Pressable>
 
         {/* Bottom row: Gallery – Capture – (empty space to keep capture centered) */}
         <View style={styles.bottomBar}>
+          <View>
+            <Modal
+              animationType='slide'
+              transparent={true}
+              visible={toggleGallery}
+              onRequestClose={() => {
+                setToggleGallery(!toggleGallery)
+              }}
+            >
+              <View style={styles.galleryBackground}>
+                <Pressable style={styles.textButton} onPress={() => setToggleGallery(false)}>
+                  <Text style={styles.textButtonLabel}>✖️ Close</Text>
+                </Pressable>
+
+                <FlatList
+                  data={monkeys}
+                  keyExtractor={(item, index) => String(index)}
+                  renderItem={({ item }) => (
+                    <Image source={item} style={styles.galleryImage} resizeMode="cover" />
+                  )}
+                />
+              </View>
+            </Modal>
+
+          </View>
+
           <Pressable style={styles.sideButton} onPress={pickPhoto}>
             <Text style={styles.iconLabel}>🖼️</Text>
             <Text style={styles.smallLabel}>Gallery</Text>
@@ -123,9 +184,11 @@ export default function CameraScreen() {
           <View style={styles.sideButton} />
         </View>
       </View>
-    </PermissionGate>
+    </PermissionGate >
   );
 }
+
+
 
 // All the styles for this screen. Change colors and sizes freely!
 const styles = StyleSheet.create({
@@ -138,6 +201,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  galleryBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingTop: 60,
+    alignItems: 'center',
+  },
+  galleryImage: {
+    width: 300,
+    height: 300,
+    borderRadius: 12,
+    marginTop: 16,
   },
   captureButton: {
     width: 80,
