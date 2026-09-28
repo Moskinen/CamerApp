@@ -59,16 +59,21 @@ export default function CameraScreen() {
     setIsCameraReady(false); // the camera starts again, so wait for it
   }
 
+  function FramedPhoto() {
+    return(
+      <View style={styles.polaroidFrame}>
+        <Image source={photoUri} style={styles.image} resizeMode="cover"/>
+      </View>
+    )
+  }
+
   // ─────────────────────────────────────────────────────────────
   // SCREEN 1: we have a photo → show it
   // ─────────────────────────────────────────────────────────────
   if (photoUri) {
     return (
       <View style={styles.container}>
-        <Image source={{ uri: photoUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-
-        {/* 🎨 YOUR PHOTO OVERLAY GOES HERE – anything rendered here appears on top of the photo
-            (frames, stickers, date stamps...). Use position: 'absolute' to place things. */}
+        <FramedPhoto></FramedPhoto>
 
         <View style={styles.bottomBar}>
           <Pressable style={styles.textButton} onPress={retake}>
@@ -172,4 +177,21 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   textButtonLabel: { color: 'white', fontSize: 18, fontWeight: '600' },
+  polaroidFrame: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    borderWidth: 2,
+    gap: 20,
+    padding: 12,
+    backgroundColor: 'white',
+    alignSelf: 'center',
+    aspectRatio: 0.921,
+    height: "80%"
+  },
+  image: {
+    margin: 30,
+    borderWidth: 1,
+    aspectRatio: 1,
+    width: "90%"
+  }
 });
