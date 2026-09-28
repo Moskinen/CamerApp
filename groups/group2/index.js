@@ -100,7 +100,6 @@ export default function CameraScreen() {
           <Image style={{width: "100%", height: "100%"}} source={require("./wanted_frame.png")} />
 
 
-
         {/* Switch between front and back camera (top right). */}
         <Pressable style={styles.flipButton} onPress={toggleFacing}>
           <Text style={styles.iconLabel}>🔄</Text>
